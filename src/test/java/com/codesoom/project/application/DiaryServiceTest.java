@@ -26,11 +26,16 @@ class DiaryServiceTest {
 
     private static final Long NOT_EXIST_ID = 100L;
     private static final Long ID = 1L;
+
     private static final String TITLE = "오늘의 다이어리";
     private static final String COMMENT = "아쉬운 하루였다";
 
+    private static final String UPDATE_TITLE = "3월 25일의 다이어리";
+    private static final String UPDATE_COMMENT = "보람찬 하루였다";
+
     private List<Diary> diaries;
     private Diary diary;
+    private Diary updatedDiary;
     private Long givenValidId;
     private Long givenInvalidId;
 
@@ -157,6 +162,60 @@ class DiaryServiceTest {
                 diaryService.createDiary(createRequest);
 
                 verify(diaryRepository).save(any(Diary.class));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("updateDiary 메소드는")
+    class Describe_updateDiary {
+        DiaryData updateRequest;
+
+        @Nested
+        @DisplayName("등록된 다이어리 id와 수정할 정보가 주어진다면")
+        class Context_with_valid_id_and_diary_data {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+
+                updateRequest = DiaryData.builder()
+                        .title(UPDATE_TITLE)
+                        .comment(UPDATE_COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("주어진 id를 갖는 다이어리의 정보를 수정한다")
+            void it_returns_diary() {
+                diaryService.updateDiary(givenValidId, updateRequest);
+
+                verify(diaryRepository).findById(givenValidId);
+
+                assertThat(diary.getTitle()).isEqualTo(UPDATE_TITLE);
+                assertThat(diary.getComment()).isEqualTo(UPDATE_COMMENT);
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 id와 수정할 정보가 주어진다면")
+        class Context_with_Invalid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenInvalidId = NOT_EXIST_ID;
+
+                updateRequest = DiaryData.builder()
+                        .title(UPDATE_TITLE)
+                        .comment(UPDATE_COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("다이어리를 찾을 수 없다는 예외를 던진다")
+            void it_returns_exception() {
+                assertThatThrownBy(() -> diaryService.updateDiary(givenInvalidId, updateRequest))
+                        .isInstanceOf(DiaryNotFoundException.class);
             }
         }
     }
