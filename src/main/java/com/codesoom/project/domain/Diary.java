@@ -33,4 +33,12 @@ public class Diary {
         this.title = source.getTitle();
         this.comment = source.getComment();
     }
+
+    public static Diary of(Diary diary) {
+        return Diary.builder()
+                .id(diary.getId())
+                .title(diary.getTitle())
+                .comment(diary.getComment())
+                .build();
+    }
 }
