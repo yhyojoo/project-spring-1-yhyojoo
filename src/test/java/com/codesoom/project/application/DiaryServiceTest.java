@@ -2,6 +2,7 @@ package com.codesoom.project.application;
 
 import com.codesoom.project.domain.Diary;
 import com.codesoom.project.domain.DiaryRepository;
+import com.codesoom.project.dto.DiaryData;
 import com.codesoom.project.errors.DiaryNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -49,6 +51,8 @@ class DiaryServiceTest {
         given(diaryRepository.findAll()).willReturn(diaries);
 
         given(diaryRepository.findById(ID)).willReturn(Optional.of(diary));
+
+        given(diaryRepository.save(any(Diary.class))).willReturn(diary);
     }
 
     @Nested
@@ -86,7 +90,6 @@ class DiaryServiceTest {
             }
         }
     }
-
 
     @Nested
     @DisplayName("getDiary 메소드는")
@@ -127,6 +130,33 @@ class DiaryServiceTest {
             void it_returns_exception() {
                 assertThatThrownBy(() -> diaryService.getDiary(givenInvalidId))
                         .isInstanceOf(DiaryNotFoundException.class);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("createDiary 메소드는")
+    class Describe_createDiary {
+        DiaryData createRequest;
+
+        @Nested
+        @DisplayName("생성할 다이어리 정보가 주어진다면")
+        class Context_with_diary_data {
+
+            @BeforeEach
+            void setUp() {
+                createRequest = DiaryData.builder()
+                        .title(TITLE)
+                        .comment(COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("새로운 다이어리를 생성한다")
+            void it_returns_diary() {
+                diaryService.createDiary(createRequest);
+
+                verify(diaryRepository).save(any(Diary.class));
             }
         }
     }
