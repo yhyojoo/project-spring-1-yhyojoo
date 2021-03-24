@@ -32,7 +32,7 @@ public class DiaryService {
      *
      * @param id 다이어리 식별자
      * @return 주어진 id를 갖는 다이어리
-     * @throws DiaryNotFoundException 주어진 id를 갖는 다이어리를 찾을 수 없을 경우
+     * @throws DiaryNotFoundException 다이어리를 찾을 수 없을 경우
      */
     public Diary getDiary(Long id) {
         return findDiary(id);
