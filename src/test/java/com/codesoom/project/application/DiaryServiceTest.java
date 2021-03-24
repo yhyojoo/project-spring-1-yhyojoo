@@ -219,4 +219,47 @@ class DiaryServiceTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("deleteDiary 메소드는")
+    class Describe_deleteDiary {
+
+        @Nested
+        @DisplayName("등록된 다이어리의 id가 주어진다면")
+        class Context_with_valid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+            }
+
+            @Test
+            @DisplayName("주어진 id를 갖는 다이어리를 삭제한다")
+            void it_returns_diary() {
+                diaryService.deleteDiary(givenValidId);
+
+                verify(diaryRepository).findById(givenValidId);
+                verify(diaryRepository).delete(diary);
+
+                assertThat(diaryRepository.findAll()).isNotIn(diary);
+            }
+        }
+
+        @Nested
+        @DisplayName("등록되지 않은 다이어리 id가 주어진다면")
+        class Context_with_Invalid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenInvalidId = NOT_EXIST_ID;
+            }
+
+            @Test
+            @DisplayName("삭제할 다이어리를 찾을 수 없다는 예외를 던진다")
+            void it_returns_exception() {
+                assertThatThrownBy(() -> diaryService.getDiary(givenInvalidId))
+                        .isInstanceOf(DiaryNotFoundException.class);
+            }
+        }
+    }
 }
