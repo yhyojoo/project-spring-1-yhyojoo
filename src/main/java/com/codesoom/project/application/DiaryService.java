@@ -54,6 +54,24 @@ public class DiaryService {
         return Diary.of(createdDiary);
     }
 
+    /**
+     * 주어진 id에 해당하는 다이어리의 정보를 수정합니다.
+     *
+     * @param id 다이어리 식별자
+     * @param diaryData 수정할 다이어리 정보
+     * @return 수정된 다이어리
+     */
+    public Diary updateDiary(Long id, DiaryData diaryData) {
+        Diary diary = findDiary(id);
+
+        diary.updateWith(Diary.builder()
+                .title(diaryData.getTitle())
+                .comment(diaryData.getComment())
+                .build());
+
+        return Diary.of(diary);
+    }
+
     public Diary findDiary(Long id) {
         return diaryRepository.findById(id)
                 .orElseThrow(() -> new DiaryNotFoundException(id));
