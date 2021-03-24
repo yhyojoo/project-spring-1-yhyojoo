@@ -28,4 +28,9 @@ public class Diary {
 
     @Setter
     private String comment;
+
+    public void updateWith(Diary source) {
+        this.title = source.getTitle();
+        this.comment = source.getComment();
+    }
 }
