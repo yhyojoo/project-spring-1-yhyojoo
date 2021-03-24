@@ -72,6 +72,20 @@ public class DiaryService {
         return Diary.of(diary);
     }
 
+    /**
+     * 주어진 id에 해당하는 다이어리를 삭제합니다.
+     *
+     * @param id 다이어리 식별자
+     * @return 삭제된 다이어리
+     */
+    public Diary deleteDiary(Long id) {
+        Diary diary = findDiary(id);
+
+        diaryRepository.delete(diary);
+
+        return diary;
+    }
+
     public Diary findDiary(Long id) {
         return diaryRepository.findById(id)
                 .orElseThrow(() -> new DiaryNotFoundException(id));
