@@ -2,6 +2,7 @@ package com.codesoom.project.application;
 
 import com.codesoom.project.domain.Diary;
 import com.codesoom.project.domain.DiaryRepository;
+import com.codesoom.project.errors.DiaryNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,5 +25,21 @@ public class DiaryService {
      */
     public List<Diary> getDiaries() {
         return diaryRepository.findAll();
+    }
+
+    /**
+     * 주어진 id에 해당하는 다이어리를 반환합니다.
+     *
+     * @param id 다이어리 식별자
+     * @return 주어진 id를 갖는 다이어리
+     * @throws DiaryNotFoundException 주어진 id를 갖는 다이어리를 찾을 수 없을 경우
+     */
+    public Diary getDiary(Long id) {
+        return findDiary(id);
+    }
+
+    public Diary findDiary(Long id) {
+        return diaryRepository.findById(id)
+                .orElseThrow(() -> new DiaryNotFoundException(id));
     }
 }
