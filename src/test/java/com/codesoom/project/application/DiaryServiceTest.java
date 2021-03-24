@@ -122,7 +122,7 @@ class DiaryServiceTest {
         }
 
         @Nested
-        @DisplayName("유효하지 않은 id가 주어진다면")
+        @DisplayName("등록되지 않은 다이어리 id가 주어진다면")
         class Context_with_Invalid_id {
 
             @BeforeEach
@@ -131,7 +131,7 @@ class DiaryServiceTest {
             }
 
             @Test
-            @DisplayName("다이어리를 찾을 수 없다는 예외를 던진다")
+            @DisplayName("조회할 다이어리를 찾을 수 없다는 예외를 던진다")
             void it_returns_exception() {
                 assertThatThrownBy(() -> diaryService.getDiary(givenInvalidId))
                         .isInstanceOf(DiaryNotFoundException.class);
@@ -146,7 +146,7 @@ class DiaryServiceTest {
 
         @Nested
         @DisplayName("생성할 다이어리 정보가 주어진다면")
-        class Context_with_diary_data {
+        class Context_with_create_request {
 
             @BeforeEach
             void setUp() {
@@ -173,7 +173,7 @@ class DiaryServiceTest {
 
         @Nested
         @DisplayName("등록된 다이어리 id와 수정할 정보가 주어진다면")
-        class Context_with_valid_id_and_diary_data {
+        class Context_with_valid_id_and_update_request {
 
             @BeforeEach
             void setUp() {
@@ -198,8 +198,8 @@ class DiaryServiceTest {
         }
 
         @Nested
-        @DisplayName("유효하지 않은 id와 수정할 정보가 주어진다면")
-        class Context_with_Invalid_id {
+        @DisplayName("등록되지 않은 다이어리 id와 수정할 정보가 주어진다면")
+        class Context_with_Invalid_id_and_update_request {
 
             @BeforeEach
             void setUp() {
@@ -212,7 +212,7 @@ class DiaryServiceTest {
             }
 
             @Test
-            @DisplayName("다이어리를 찾을 수 없다는 예외를 던진다")
+            @DisplayName("수정할 다이어리를 찾을 수 없다는 예외를 던진다")
             void it_returns_exception() {
                 assertThatThrownBy(() -> diaryService.updateDiary(givenInvalidId, updateRequest))
                         .isInstanceOf(DiaryNotFoundException.class);
