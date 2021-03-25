@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,11 +47,15 @@ class DiaryControllerTest {
 
     private static final Long NOT_EXIST_ID = 100L;
     private static final Long ID = 1L;
+
     private static final String TITLE = "오늘의 다이어리";
     private static final String COMMENT = "아쉬운 하루였다";
 
+    private static final String UPDATE_TITLE = "3월 25일의 다이어리";
+    private static final String UPDATE_COMMENT = "보람찬 하루였다";
+
     private Diary diary;
-    private DiaryData createRequest;
+    private Diary updatedDiary;
     private Long givenValidId;
     private Long givenInvalidId;
     private DiaryData InvalidAttributes;
@@ -65,13 +70,28 @@ class DiaryControllerTest {
                 .comment(COMMENT)
                 .build();
 
+        updatedDiary = Diary.builder()
+                .id(ID)
+                .title(UPDATE_TITLE)
+                .comment(UPDATE_COMMENT)
+                .build();
+
         diaries.add(diary);
 
         given(diaryService.getDiaries()).willReturn(diaries);
 
         given(diaryService.getDiary(eq(ID))).willReturn(diary);
 
+        given(diaryService.getDiary(eq(NOT_EXIST_ID)))
+                .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
+
         given(diaryService.createDiary(any(DiaryData.class))).willReturn(diary);
+
+        given(diaryService.updateDiary(eq(ID), any(DiaryData.class)))
+                .willReturn(updatedDiary);
+
+        given(diaryService.updateDiary(eq(NOT_EXIST_ID), any(DiaryData.class)))
+                .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
     }
 
     @Nested
@@ -84,7 +104,11 @@ class DiaryControllerTest {
 
             @BeforeEach
             void setUp() {
-                diary = new Diary();
+                diary = Diary.builder()
+                        .id(ID)
+                        .title(TITLE)
+                        .comment(COMMENT)
+                        .build();
             }
 
             @Test
@@ -92,6 +116,8 @@ class DiaryControllerTest {
             void it_returns_list_and_200() throws Exception {
                 mockMvc.perform(get("/diaries"))
                         .andExpect(status().isOk());
+
+                verify(diaryService).getDiaries();
             }
         }
     }
@@ -114,6 +140,7 @@ class DiaryControllerTest {
             void it_returns_diary_and_200() throws Exception {
                 mockMvc.perform(get("/diaries/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
+
                 )
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("아쉬운")));
@@ -129,9 +156,6 @@ class DiaryControllerTest {
             @BeforeEach
             void setUp() {
                 givenInvalidId = NOT_EXIST_ID;
-
-                given(diaryService.getDiary(NOT_EXIST_ID))
-                        .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
             }
 
             @Test
@@ -148,6 +172,7 @@ class DiaryControllerTest {
     @Nested
     @DisplayName("create 메소드는")
     class Describe_create {
+        DiaryData createRequest;
 
         @Nested
         @DisplayName("생성할 다이어리 정보가 주어진다면")
@@ -162,7 +187,7 @@ class DiaryControllerTest {
             }
 
             @Test
-            @DisplayName("생성한 다이어리와 응답코드 201을 반환한다")
+            @DisplayName("생성된 다이어리와 응답코드 201을 반환한다")
             void it_returns_diary_and_201() throws Exception {
                 mockMvc.perform(post("/diaries")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -190,6 +215,91 @@ class DiaryControllerTest {
             @DisplayName("응답코드 400을 반환한다")
             void it_returns_400() throws Exception {
                 mockMvc.perform(post("/diaries")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(InvalidAttributes))
+                )
+                        .andExpect(status().isBadRequest());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("update 메소드는")
+    class Describe_update {
+        DiaryData updateRequest;
+
+        @Nested
+        @DisplayName("등록된 다이어리 id와 수정할 정보가 주어진다면")
+        class Context_with_valid_id_and_update_request {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+
+                updateRequest = DiaryData.builder()
+                        .title(UPDATE_TITLE)
+                        .comment(UPDATE_COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("수정된 다이어리와 응답코드 200을 반환한다")
+            void it_returns_diary_and_200() throws Exception {
+                mockMvc.perform(patch("/diaries/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest))
+                )
+                        .andExpect(status().isOk());
+
+                verify(diaryService).updateDiary(eq(ID), any(DiaryData.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("등록되지 않은 다이어리 id와 수정할 정보가 주어진다면")
+        class Context_with_invalid_id_and_update_request {
+
+            @BeforeEach
+            void setUp() {
+                givenInvalidId = NOT_EXIST_ID;
+
+                updateRequest = DiaryData.builder()
+                        .title(UPDATE_TITLE)
+                        .comment(UPDATE_COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("응답코드 404를 반환한다")
+            void it_returns_404() throws Exception {
+                mockMvc.perform(patch("/diaries/100")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest))
+                )
+                        .andExpect(status().isNotFound());
+
+                verify(diaryService).updateDiary(eq(NOT_EXIST_ID), any(DiaryData.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("등록된 다이어리 id와 유효하지 않은 정보가 주어진다면")
+        class Context_with_valid_id_and_invalid_attributes {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+
+                InvalidAttributes = DiaryData.builder()
+                        .title("")
+                        .comment(UPDATE_COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("응답코드 400를 반환한다")
+            void it_returns_400() throws Exception {
+                mockMvc.perform(patch("/diaries/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(InvalidAttributes))
                 )
