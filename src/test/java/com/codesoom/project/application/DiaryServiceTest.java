@@ -35,7 +35,6 @@ class DiaryServiceTest {
 
     private List<Diary> diaries;
     private Diary diary;
-    private Diary updatedDiary;
     private Long givenValidId;
     private Long givenInvalidId;
 
