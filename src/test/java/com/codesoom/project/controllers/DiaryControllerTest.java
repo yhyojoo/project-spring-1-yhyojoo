@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -91,6 +92,9 @@ class DiaryControllerTest {
                 .willReturn(updatedDiary);
 
         given(diaryService.updateDiary(eq(NOT_EXIST_ID), any(DiaryData.class)))
+                .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
+
+        given(diaryService.deleteDiary(eq(NOT_EXIST_ID)))
                 .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
     }
 
@@ -304,6 +308,49 @@ class DiaryControllerTest {
                         .content(objectMapper.writeValueAsString(InvalidAttributes))
                 )
                         .andExpect(status().isBadRequest());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("delete 메소드는")
+    class Describe_delete {
+
+        @Nested
+        @DisplayName("등록된 다이어리 id가 주어진다면")
+        class Context_with_valid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+            }
+
+            @Test
+            @DisplayName("주어진 id를 갖는 다이어리를 삭제하고 응답코드 200을 반환한다")
+            void it_deletes_diary_and_200() throws Exception {
+                mockMvc.perform(delete("/diaries/1"))
+                        .andExpect(status().isOk());
+
+                verify(diaryService).deleteDiary(givenValidId);
+            }
+        }
+
+        @Nested
+        @DisplayName("등록되지 않은 다이어리 id가 주어진다면")
+        class Context_with_invalid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenInvalidId = NOT_EXIST_ID;
+            }
+
+            @Test
+            @DisplayName("응답코드 404를 반환한다")
+            void it_returns_404() throws Exception {
+                mockMvc.perform(delete("/diaries/100"))
+                        .andExpect(status().isNotFound());
+
+                verify(diaryService).deleteDiary(givenInvalidId);
             }
         }
     }
