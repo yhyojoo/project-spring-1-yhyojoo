@@ -60,6 +60,7 @@ public class DiaryService {
      * @param id 다이어리 식별자
      * @param diaryData 수정할 다이어리 정보
      * @return 수정된 다이어리
+     * @throws DiaryNotFoundException 다이어리를 찾을 수 없을 경우
      */
     public Diary updateDiary(Long id, DiaryData diaryData) {
         Diary diary = findDiary(id);
@@ -77,6 +78,7 @@ public class DiaryService {
      *
      * @param id 다이어리 식별자
      * @return 삭제된 다이어리
+     * @throws DiaryNotFoundException 다이어리를 찾을 수 없을 경우
      */
     public Diary deleteDiary(Long id) {
         Diary diary = findDiary(id);
