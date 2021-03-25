@@ -5,6 +5,7 @@ import com.codesoom.project.domain.Diary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,5 +29,16 @@ public class DiaryController {
     @GetMapping
     public List<Diary> list() {
         return diaryService.getDiaries();
+    }
+
+    /**
+     * 주어진 id에 해당하는 다이어리를 반환합니다.
+     *
+     * @param id 다이어리 식별자
+     * @return 주어진 id를 갖는 다이어리
+     */
+    @GetMapping("{id}")
+    public Diary detail(@PathVariable Long id) {
+        return diaryService.getDiary(id);
     }
 }
