@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DiaryController.class)
@@ -138,12 +137,11 @@ class DiaryControllerTest {
             @Test
             @DisplayName("주어진 id를 갖는 다이어리와 응답코드 200을 반환한다")
             void it_returns_diary_and_200() throws Exception {
-                mockMvc.perform(get("/diaries/1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-
-                )
+                mockMvc.perform(get("/diaries/1"))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("아쉬운")));
+                        .andExpect(jsonPath("id").value(ID))
+                        .andExpect(jsonPath("title").value(TITLE))
+                        .andExpect(jsonPath("comment").value(COMMENT));
 
                 verify(diaryService).getDiary(givenValidId);
             }
@@ -193,7 +191,10 @@ class DiaryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest))
                 )
-                        .andExpect(status().isCreated());
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("id").value(ID))
+                        .andExpect(jsonPath("title").value(TITLE))
+                        .andExpect(jsonPath("comment").value(COMMENT));
 
                 verify(diaryService).createDiary(any(DiaryData.class));
             }
@@ -249,7 +250,10 @@ class DiaryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest))
                 )
-                        .andExpect(status().isOk());
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("id").value(ID))
+                        .andExpect(jsonPath("title").value(UPDATE_TITLE))
+                        .andExpect(jsonPath("comment").value(UPDATE_COMMENT));
 
                 verify(diaryService).updateDiary(eq(ID), any(DiaryData.class));
             }
