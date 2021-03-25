@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -59,7 +60,7 @@ class DiaryControllerTest {
 
         given(diaryService.getDiaries()).willReturn(diaries);
 
-        given(diaryService.getDiary(ID)).willReturn(diary);
+        given(diaryService.getDiary(eq(ID))).willReturn(diary);
     }
 
     @Nested
@@ -76,8 +77,8 @@ class DiaryControllerTest {
             }
 
             @Test
-            @DisplayName("전체 다이어리 목록을 반환한다")
-            void it_returns_list() throws Exception {
+            @DisplayName("전체 다이어리 목록과 응답코드 200을 반환한다")
+            void it_returns_list_and_200() throws Exception {
                 mockMvc.perform(get("/diaries"))
                         .andExpect(status().isOk());
             }
@@ -98,8 +99,8 @@ class DiaryControllerTest {
             }
 
             @Test
-            @DisplayName("주어진 id를 갖는 다이어리를 반환한다")
-            void it_returns_diary() throws Exception {
+            @DisplayName("주어진 id를 갖는 다이어리와 응답코드 200을 반환한다")
+            void it_returns_diary_and_200() throws Exception {
                 mockMvc.perform(get("/diaries/1")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
                 )
@@ -123,8 +124,8 @@ class DiaryControllerTest {
             }
 
             @Test
-            @DisplayName("주어진 id를 갖는 다이어리를 반환한다")
-            void it_returns_exception() throws Exception {
+            @DisplayName("응답코드 404를 반환한다")
+            void it_returns_404() throws Exception {
                 mockMvc.perform(get("/diaries/100"))
                         .andExpect(status().isNotFound());
 
