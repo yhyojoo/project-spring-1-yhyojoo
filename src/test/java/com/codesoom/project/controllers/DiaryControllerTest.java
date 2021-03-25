@@ -108,11 +108,7 @@ class DiaryControllerTest {
 
             @BeforeEach
             void setUp() {
-                diary = Diary.builder()
-                        .id(ID)
-                        .title(TITLE)
-                        .comment(COMMENT)
-                        .build();
+                diary = new Diary();
             }
 
             @Test
@@ -358,5 +354,6 @@ class DiaryControllerTest {
     @AfterEach
     public void afterEach() {
         diaryRepository.delete(diary);
+        diaryRepository.delete(updatedDiary);
     }
 }
