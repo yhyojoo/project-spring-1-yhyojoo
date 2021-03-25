@@ -3,7 +3,9 @@ package com.codesoom.project.controllers;
 import com.codesoom.project.application.DiaryService;
 import com.codesoom.project.domain.Diary;
 import com.codesoom.project.domain.DiaryRepository;
+import com.codesoom.project.dto.DiaryData;
 import com.codesoom.project.errors.DiaryNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,10 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DiaryControllerTest {
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private DiaryService diaryService;
@@ -43,8 +50,10 @@ class DiaryControllerTest {
     private static final String COMMENT = "아쉬운 하루였다";
 
     private Diary diary;
+    private DiaryData createRequest;
     private Long givenValidId;
     private Long givenInvalidId;
+    private DiaryData InvalidAttributes;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +70,8 @@ class DiaryControllerTest {
         given(diaryService.getDiaries()).willReturn(diaries);
 
         given(diaryService.getDiary(eq(ID))).willReturn(diary);
+
+        given(diaryService.createDiary(any(DiaryData.class))).willReturn(diary);
     }
 
     @Nested
@@ -130,6 +141,59 @@ class DiaryControllerTest {
                         .andExpect(status().isNotFound());
 
                 verify(diaryService).getDiary(givenInvalidId);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("create 메소드는")
+    class Describe_create {
+
+        @Nested
+        @DisplayName("생성할 다이어리 정보가 주어진다면")
+        class Context_with_create_request {
+
+            @BeforeEach
+            void setUp() {
+                createRequest = DiaryData.builder()
+                        .title(TITLE)
+                        .comment(COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("생성한 다이어리와 응답코드 201을 반환한다")
+            void it_returns_diary_and_201() throws Exception {
+                mockMvc.perform(post("/diaries")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest))
+                )
+                        .andExpect(status().isCreated());
+
+                verify(diaryService).createDiary(any(DiaryData.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("유효하지 않은 정보가 주어진다면")
+        class Context_with_invalid_attributes {
+
+            @BeforeEach
+            void setUp() {
+                InvalidAttributes = DiaryData.builder()
+                        .title("")
+                        .comment(COMMENT)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("응답코드 400을 반환한다")
+            void it_returns_400() throws Exception {
+                mockMvc.perform(post("/diaries")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(InvalidAttributes))
+                )
+                        .andExpect(status().isBadRequest());
             }
         }
     }
