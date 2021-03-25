@@ -6,6 +6,7 @@ import com.codesoom.project.dto.DiaryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,5 +74,16 @@ public class DiaryController {
     public Diary update(@PathVariable Long id,
                         @RequestBody @Valid DiaryData diaryData) {
         return diaryService.updateDiary(id, diaryData);
+    }
+
+    /**
+     * 주어진 id에 해당하는 다이어리를 삭제합니다.
+     *
+     * @param id 다이어리 식별자
+     */
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable Long id) {
+        diaryService.deleteDiary(id);
     }
 }
