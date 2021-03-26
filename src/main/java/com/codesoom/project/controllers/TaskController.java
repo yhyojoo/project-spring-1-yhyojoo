@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 할 일 관련 요청을 처리합니다.
+ */
 @RestController
 @RequestMapping("/diaries/{id}/tasks")
 @CrossOrigin
@@ -28,6 +31,12 @@ public class TaskController {
         return taskService.getTasks();
     }
 
+    /**
+     * 주어진 id에 해당하는 할 일을 반환합니다.
+     *
+     * @param id 할 일 식별자
+     * @return 주어진 id를 갖는 할 일
+     */
     @GetMapping("{id}")
     public Task detail(@PathVariable Long id) {
         return taskService.getTask(id);
