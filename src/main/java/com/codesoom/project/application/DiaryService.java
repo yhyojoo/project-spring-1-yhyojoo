@@ -88,6 +88,12 @@ public class DiaryService {
         return diary;
     }
 
+    /**
+     * 주어진 id에 해당하는 다이어리를 반환합니다.
+     *
+     * @param id 다이어리 식별자
+     * @return 주어진 id를 갖는 다이어리
+     */
     public Diary findDiary(Long id) {
         return diaryRepository.findById(id)
                 .orElseThrow(() -> new DiaryNotFoundException(id));
