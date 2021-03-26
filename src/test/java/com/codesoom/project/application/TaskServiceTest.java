@@ -2,6 +2,7 @@ package com.codesoom.project.application;
 
 import com.codesoom.project.domain.Task;
 import com.codesoom.project.domain.TaskRepository;
+import com.codesoom.project.dto.TaskData;
 import com.codesoom.project.errors.TaskNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -48,6 +50,8 @@ class TaskServiceTest {
         given(taskRepository.findAll()).willReturn(tasks);
 
         given(taskRepository.findById(eq(ID))).willReturn(Optional.of(task));
+
+        given(taskRepository.save(any(Task.class))).willReturn(task);
     }
 
     @Nested
@@ -93,7 +97,7 @@ class TaskServiceTest {
     class Describe_getTask {
 
         @Nested
-        @DisplayName("등록된 할 일의 id가 주어진다면")
+        @DisplayName("존재하는 할 일의 id가 주어진다면")
         class Context_with_valid_id {
 
             @BeforeEach
@@ -114,7 +118,7 @@ class TaskServiceTest {
         }
 
         @Nested
-        @DisplayName("등록되지 않은 할 일의 id가 주어진다면")
+        @DisplayName("존재하지 않는 할 일의 id가 주어진다면")
         class Context_with_Invalid_id {
 
             @BeforeEach
@@ -123,10 +127,39 @@ class TaskServiceTest {
             }
 
             @Test
-            @DisplayName("조회할 할 일을 찾을 수 없다는 예외를 던진다")
+            @DisplayName("할 일을 찾을 수 없다는 예외를 던진다")
             void it_returns_exception() {
                 assertThatThrownBy(() -> taskService.getTask(givenInvalidId))
                         .isInstanceOf(TaskNotFoundException.class);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("createTask 메소드는")
+    class Describe_createTask {
+        TaskData createRequest;
+
+        @Nested
+        @DisplayName("할 일의 타이틀이 주어진다면")
+        class Context_with_create_request {
+
+            @BeforeEach
+            void setUp() {
+                createRequest = TaskData.builder()
+                        .title(TITLE)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("새로운 할 일을 추가한다")
+            void it_returns_task() {
+                task = taskService.createTask(createRequest);
+
+                verify(taskRepository).save(any(Task.class));
+
+                assertThat(task.getId()).isEqualTo(ID);
+                assertThat(task.getTitle()).isEqualTo(TITLE);
             }
         }
     }
