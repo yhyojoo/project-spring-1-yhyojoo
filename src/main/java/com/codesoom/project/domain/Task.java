@@ -28,4 +28,8 @@ public class Task {
         this.id = id;
         this.title = title;
     }
+
+    public void updateWith(Task source) {
+        this.title = source.getTitle();
+    }
 }
