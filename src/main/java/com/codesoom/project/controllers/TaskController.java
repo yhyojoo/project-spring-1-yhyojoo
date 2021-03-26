@@ -2,13 +2,19 @@ package com.codesoom.project.controllers;
 
 import com.codesoom.project.application.TaskService;
 import com.codesoom.project.domain.Task;
+import com.codesoom.project.dto.TaskData;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -40,5 +46,17 @@ public class TaskController {
     @GetMapping("{id}")
     public Task detail(@PathVariable Long id) {
         return taskService.getTask(id);
+    }
+
+    /**
+     * 새로운 할 일을 추가합니다.
+     *
+     * @param taskData 추가할 할 일 정보
+     * @return 추가된 할 일
+     */
+    @PostMapping("{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Task create(@RequestBody @Valid TaskData taskData) {
+        return taskService.createTask(taskData);
     }
 }

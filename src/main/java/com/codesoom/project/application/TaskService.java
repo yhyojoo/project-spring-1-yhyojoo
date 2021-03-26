@@ -2,6 +2,7 @@ package com.codesoom.project.application;
 
 import com.codesoom.project.domain.Task;
 import com.codesoom.project.domain.TaskRepository;
+import com.codesoom.project.dto.TaskData;
 import com.codesoom.project.errors.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,25 @@ public class TaskService {
      * @return 주어진 id를 갖는 할 일
      * @throws TaskNotFoundException 할 일을 찾을 수 없을 경우
      */
-    public Task getTask(Long id) { return findTask(id);
+    public Task getTask(Long id) {
+        return findTask(id);
+    }
+
+    /**
+     * 새로운 할 일을 등록합니다.
+     *
+     * @param taskData 추가할 할 일 정보
+     * @return 추가된 할 일
+     * @throws TaskNotFoundException 할 일을 찾을 수 없을 경우
+     */
+    public Task createTask(TaskData taskData) {
+        Task task = Task.builder()
+                .title(taskData.getTitle())
+                .build();
+
+        taskRepository.save(task);
+
+        return task;
     }
 
     /**
