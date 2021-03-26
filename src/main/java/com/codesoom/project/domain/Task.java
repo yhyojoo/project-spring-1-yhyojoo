@@ -9,10 +9,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+/**
+ * 할 일 정보.
+ */
 @Getter
 @NoArgsConstructor
 @Entity
-public class ToDo {
+public class Task {
     @Id
     @GeneratedValue
     private Long id;
@@ -21,7 +24,7 @@ public class ToDo {
     private String title;
 
     @Builder
-    public ToDo(Long id, String title) {
+    public Task(Long id, String title) {
         this.id = id;
         this.title = title;
     }
