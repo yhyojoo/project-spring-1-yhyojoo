@@ -43,7 +43,7 @@ public class DiaryController {
      * 주어진 id에 해당하는 다이어리를 반환합니다.
      *
      * @param id 다이어리 식별자
-     * @return 다이어리
+     * @return 주어진 id를 갖는 다이어리
      */
     @GetMapping("{id}")
     public Diary detail(@PathVariable Long id) {
