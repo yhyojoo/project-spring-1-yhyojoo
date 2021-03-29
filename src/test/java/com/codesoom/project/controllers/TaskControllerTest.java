@@ -96,6 +96,8 @@ class TaskControllerTest {
 
         given(taskService.deleteTask(eq(NOT_EXIST_ID)))
                 .willThrow(new TaskNotFoundException(NOT_EXIST_ID));
+
+        taskRepository.delete(task);
     }
 
     @Nested
@@ -354,7 +356,7 @@ class TaskControllerTest {
         }
 
         @AfterEach
-        public void afterEach() {
+        public void clearContext() {
             taskRepository.delete(task);
         }
     }

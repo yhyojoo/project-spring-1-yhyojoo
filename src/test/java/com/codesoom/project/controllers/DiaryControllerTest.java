@@ -104,6 +104,8 @@ class DiaryControllerTest {
 
         given(diaryService.deleteDiary(eq(NOT_EXIST_ID)))
                 .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
+
+        diaryRepository.delete(diary);
     }
 
     @Nested
@@ -365,7 +367,7 @@ class DiaryControllerTest {
     }
 
     @AfterEach
-    public void afterEach() {
+    public void clearContext() {
         diaryRepository.delete(diary);
     }
 }
