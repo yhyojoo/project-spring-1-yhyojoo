@@ -216,4 +216,46 @@ class TaskServiceTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("deleteTask 메소드는")
+    class Describe_deleteTask {
+
+        @Nested
+        @DisplayName("존재하는 할 일의 id가 주어진다면")
+        class Context_with_valid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+            }
+
+            @Test
+            @DisplayName("주어진 id를 갖는 할 일을 삭제한다")
+            void it_returns_task() {
+                taskService.deleteTask(givenValidId);
+
+                verify(taskRepository).findById(givenValidId);
+
+                assertThat(taskRepository.findAll()).isNotIn(givenValidId);
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 할 일의 id가 주어진다면")
+        class Context_with_Invalid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenInvalidId = NOT_EXIST_ID;
+            }
+
+            @Test
+            @DisplayName("할 일을 찾을 수 없다는 예외를 던진다")
+            void it_returns_exception() {
+                assertThatThrownBy(() -> taskService.getTask(givenInvalidId))
+                        .isInstanceOf(TaskNotFoundException.class);
+            }
+        }
+    }
 }

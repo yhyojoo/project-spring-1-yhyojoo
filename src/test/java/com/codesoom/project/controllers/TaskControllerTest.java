@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -90,7 +91,10 @@ class TaskControllerTest {
         given(taskService.updateTask(eq(ID), any(TaskUpdateData.class)))
                 .willReturn(updatedTask);
 
-        given(taskService.updateTask(eq(NOT_EXIST_ID),any(TaskUpdateData.class)))
+        given(taskService.updateTask(eq(NOT_EXIST_ID), any(TaskUpdateData.class)))
+                .willThrow(new TaskNotFoundException(NOT_EXIST_ID));
+
+        given(taskService.deleteTask(eq(NOT_EXIST_ID)))
                 .willThrow(new TaskNotFoundException(NOT_EXIST_ID));
     }
 
@@ -307,9 +311,51 @@ class TaskControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("delete 메소드는")
+    class Describe_delete {
 
-    @AfterEach
-    public void afterEach() {
-        taskRepository.delete(task);
+        @Nested
+        @DisplayName("존재하는 할 일의 id가 주어진다면")
+        class Context_with_valid_id {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+            }
+
+            @Test
+            @DisplayName("주어진 id를 갖는 할 일을 삭제하고 응답코드 200을 반환한다")
+            void it_returns_task_and_200() throws Exception {
+                mockMvc.perform(delete("/diaries/1/tasks/1"))
+                        .andExpect(status().isOk());
+
+                verify(taskService).deleteTask(givenValidId);
+            }
+
+            @Nested
+            @DisplayName("존재하지 않는 할 일의 id가 주어진다면")
+            class Context_with_invalid_id {
+
+                @BeforeEach
+                void setUp() {
+                    givenInvalidId = NOT_EXIST_ID;
+                }
+
+                @Test
+                @DisplayName("응답코드 404를 반환한다")
+                void it_returns_404() throws Exception {
+                    mockMvc.perform(delete("/diaries/1/tasks/100"))
+                            .andExpect(status().isNotFound());
+
+                    verify(taskService).deleteTask(givenInvalidId);
+                }
+            }
+        }
+
+        @AfterEach
+        public void afterEach() {
+            taskRepository.delete(task);
+        }
     }
 }
