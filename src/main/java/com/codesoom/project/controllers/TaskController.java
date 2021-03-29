@@ -8,6 +8,7 @@ import com.codesoom.project.dto.TaskResultData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,11 +66,29 @@ public class TaskController {
         return taskService.createTask(taskCreateData);
     }
 
+    /**
+     * 주어진 id에 해당하는 할 일을 수정합니다.
+     *
+     * @param id             할 일 식별자
+     * @param taskUpdateData 수정할 할 일 정보
+     * @return 수정된 할 일
+     */
     @PatchMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public TaskResultData update(@PathVariable Long id,
                                  @RequestBody @Valid TaskUpdateData taskUpdateData
     ) {
         return taskService.updateTask(id, taskUpdateData);
+    }
+
+    /**
+     * 주어진 id에 해당하는 할 일을 삭제합니다.
+     *
+     * @param id 할 일 식별자
+     */
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable Long id) {
+        taskService.deleteTask(id);
     }
 }

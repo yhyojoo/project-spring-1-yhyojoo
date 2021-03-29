@@ -3,8 +3,8 @@ package com.codesoom.project.application;
 import com.codesoom.project.domain.Task;
 import com.codesoom.project.domain.TaskRepository;
 import com.codesoom.project.dto.TaskCreateData;
-import com.codesoom.project.dto.TaskUpdateData;
 import com.codesoom.project.dto.TaskResultData;
+import com.codesoom.project.dto.TaskUpdateData;
 import com.codesoom.project.errors.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -77,6 +77,21 @@ public class TaskService {
                 .build());
 
         return TaskResultData.of(task);
+    }
+
+    /**
+     * 주어진 id에 해당하는 할 일을 삭제합니다.
+     *
+     * @param id 할 일 식별자
+     * @return 삭제된 할 일
+     * @throws TaskNotFoundException 할 일을 찾을 수 없을 경우
+     */
+    public Task deleteTask(Long id) {
+        Task task = findTask(id);
+
+        taskRepository.delete(task);
+
+        return task;
     }
 
     /**
