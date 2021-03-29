@@ -2,7 +2,9 @@ package com.codesoom.project.application;
 
 import com.codesoom.project.domain.Task;
 import com.codesoom.project.domain.TaskRepository;
-import com.codesoom.project.dto.TaskData;
+import com.codesoom.project.dto.TaskCreateData;
+import com.codesoom.project.dto.TaskUpdateData;
+import com.codesoom.project.dto.TaskResultData;
 import com.codesoom.project.errors.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,18 +44,39 @@ public class TaskService {
     /**
      * 새로운 할 일을 등록합니다.
      *
-     * @param taskData 추가할 할 일 정보
+     * @param taskCreateData 추가할 할 일 정보
      * @return 추가된 할 일
      * @throws TaskNotFoundException 할 일을 찾을 수 없을 경우
      */
-    public Task createTask(TaskData taskData) {
-        Task task = Task.builder()
-                .title(taskData.getTitle())
-                .build();
+    public TaskResultData createTask(
+            TaskCreateData taskCreateData
+    ) {
+        Task task = taskCreateData.toEntity();
 
         taskRepository.save(task);
 
-        return task;
+        return TaskResultData.of(task);
+    }
+
+    /**
+     * 주어진 id에 해당하는 할 일을 수정합니다.
+     *
+     * @param id 할 일 식별자
+     * @param taskUpdateData 수정할 할 일 정보
+     * @return 수정된 할 일
+     * @throws TaskNotFoundException 할 일을 찾을 수 없을 경우
+     */
+    public TaskResultData updateTask(
+            Long id,
+            TaskUpdateData taskUpdateData
+    ) {
+        Task task = findTask(id);
+
+        task.updateWith(Task.builder()
+                .title(taskUpdateData.getTitle())
+                .build());
+
+        return TaskResultData.of(task);
     }
 
     /**

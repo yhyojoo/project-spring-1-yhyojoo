@@ -2,7 +2,8 @@ package com.codesoom.project.application;
 
 import com.codesoom.project.domain.Diary;
 import com.codesoom.project.domain.DiaryRepository;
-import com.codesoom.project.dto.DiaryData;
+import com.codesoom.project.dto.DiaryCreateData;
+import com.codesoom.project.dto.DiaryUpdateData;
 import com.codesoom.project.errors.DiaryNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -54,7 +56,7 @@ class DiaryServiceTest {
 
         given(diaryRepository.findAll()).willReturn(diaries);
 
-        given(diaryRepository.findById(ID)).willReturn(Optional.of(diary));
+        given(diaryRepository.findById(eq(ID))).willReturn(Optional.of(diary));
 
         given(diaryRepository.save(any(Diary.class))).willReturn(diary);
     }
@@ -141,7 +143,7 @@ class DiaryServiceTest {
     @Nested
     @DisplayName("createDiary 메소드는")
     class Describe_createDiary {
-        DiaryData createRequest;
+        DiaryCreateData createRequest;
 
         @Nested
         @DisplayName("생성할 다이어리 정보가 주어진다면")
@@ -149,7 +151,7 @@ class DiaryServiceTest {
 
             @BeforeEach
             void setUp() {
-                createRequest = DiaryData.builder()
+                createRequest = DiaryCreateData.builder()
                         .title(TITLE)
                         .comment(COMMENT)
                         .build();
@@ -168,7 +170,7 @@ class DiaryServiceTest {
     @Nested
     @DisplayName("updateDiary 메소드는")
     class Describe_updateDiary {
-        DiaryData updateRequest;
+        DiaryUpdateData updateRequest;
 
         @Nested
         @DisplayName("등록된 다이어리 id와 수정할 정보가 주어진다면")
@@ -178,7 +180,7 @@ class DiaryServiceTest {
             void setUp() {
                 givenValidId = ID;
 
-                updateRequest = DiaryData.builder()
+                updateRequest = DiaryUpdateData.builder()
                         .title(UPDATE_TITLE)
                         .comment(UPDATE_COMMENT)
                         .build();
@@ -204,7 +206,7 @@ class DiaryServiceTest {
             void setUp() {
                 givenInvalidId = NOT_EXIST_ID;
 
-                updateRequest = DiaryData.builder()
+                updateRequest = DiaryUpdateData.builder()
                         .title(UPDATE_TITLE)
                         .comment(UPDATE_COMMENT)
                         .build();

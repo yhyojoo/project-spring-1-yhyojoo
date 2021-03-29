@@ -3,7 +3,9 @@ package com.codesoom.project.controllers;
 import com.codesoom.project.application.TaskService;
 import com.codesoom.project.domain.Task;
 import com.codesoom.project.domain.TaskRepository;
-import com.codesoom.project.dto.TaskData;
+import com.codesoom.project.dto.TaskCreateData;
+import com.codesoom.project.dto.TaskUpdateData;
+import com.codesoom.project.dto.TaskResultData;
 import com.codesoom.project.errors.TaskNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,12 +49,15 @@ class TaskControllerTest {
     private static final Long NOT_EXIST_ID = 100L;
     private static final Long ID = 1L;
     private static final String TITLE = "첫 번째 할 일";
+    private static final String UPDATE_TITLE = "새로운 할 일";
+
 
     private List<Task> tasks;
     private Task task;
+    private TaskResultData createdTask;
+    private TaskResultData updatedTask;
     private Long givenValidId;
     private Long givenInvalidId;
-    private TaskData InvalidAttributes;
 
     @BeforeEach
     void setUp() {
@@ -62,6 +68,16 @@ class TaskControllerTest {
                 .title(TITLE)
                 .build();
 
+        createdTask = TaskResultData.builder()
+                .id(ID)
+                .title(TITLE)
+                .build();
+
+        updatedTask = TaskResultData.builder()
+                .id(ID)
+                .title(UPDATE_TITLE)
+                .build();
+
         given(taskService.getTasks()).willReturn(tasks);
 
         given(taskService.getTask(ID)).willReturn(task);
@@ -69,7 +85,13 @@ class TaskControllerTest {
         given(taskService.getTask(eq(NOT_EXIST_ID)))
                 .willThrow(new TaskNotFoundException(NOT_EXIST_ID));
 
-        given(taskService.createTask(any(TaskData.class))).willReturn(task);
+        given(taskService.createTask(any(TaskCreateData.class))).willReturn(createdTask);
+
+        given(taskService.updateTask(eq(ID), any(TaskUpdateData.class)))
+                .willReturn(updatedTask);
+
+        given(taskService.updateTask(eq(NOT_EXIST_ID),any(TaskUpdateData.class)))
+                .willThrow(new TaskNotFoundException(NOT_EXIST_ID));
     }
 
     @Nested
@@ -148,7 +170,8 @@ class TaskControllerTest {
     @Nested
     @DisplayName("create 메소드는")
     class Describe_create {
-        TaskData createRequest;
+        TaskCreateData createRequest;
+        TaskCreateData invalidAttributes;
 
         @Nested
         @DisplayName("할 일의 타이틀이 주어진다면")
@@ -156,7 +179,7 @@ class TaskControllerTest {
 
             @BeforeEach
             void setUp() {
-                createRequest = TaskData.builder()
+                createRequest = TaskCreateData.builder()
                         .title(TITLE)
                         .build();
             }
@@ -164,7 +187,7 @@ class TaskControllerTest {
             @Test
             @DisplayName("추가된 할 일과 응답코드 201을 반환한다")
             void it_returns_task_and_201() throws Exception {
-                mockMvc.perform(post("/diaries/1/tasks/1")
+                mockMvc.perform(post("/diaries/1/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest))
                 )
@@ -172,7 +195,7 @@ class TaskControllerTest {
                         .andExpect(jsonPath("id").value(ID))
                         .andExpect(jsonPath("title").value(TITLE));
 
-                verify(taskService).createTask(any(TaskData.class));
+                verify(taskService).createTask(any(TaskCreateData.class));
             }
         }
 
@@ -182,7 +205,7 @@ class TaskControllerTest {
 
             @BeforeEach
             void setUp() {
-                InvalidAttributes = TaskData.builder()
+                invalidAttributes = TaskCreateData.builder()
                         .title("")
                         .build();
             }
@@ -190,14 +213,100 @@ class TaskControllerTest {
             @Test
             @DisplayName("응답코드 400을 반환한다")
             void it_returns_400() throws Exception {
-                mockMvc.perform(post("/diaries/1/tasks/1")
+                mockMvc.perform(post("/diaries/1/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(InvalidAttributes))
+                        .content(objectMapper.writeValueAsString(invalidAttributes))
                 )
                         .andExpect(status().isBadRequest());
             }
         }
     }
+
+    @Nested
+    @DisplayName("update 메소드는")
+    class Describe_update {
+        TaskUpdateData updateRequest;
+        TaskUpdateData invalidAttributes;
+
+        @Nested
+        @DisplayName("존재하는 할 일 id와 수정할 타이틀이 주어진다면")
+        class Context_with_valid_id_and_update_request {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+
+                updateRequest = TaskUpdateData.builder()
+                        .title(UPDATE_TITLE)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("수정된 할 일 응답코드 200을 반환한다")
+            void it_returns_task_and_200() throws Exception {
+                mockMvc.perform(patch("/diaries/1/tasks/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest))
+                )
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("id").value(ID))
+                        .andExpect(jsonPath("title").value(UPDATE_TITLE));
+
+                verify(taskService).updateTask(eq(ID), any(TaskUpdateData.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 할 일 id와 수정할 타이틀이 주어진다면")
+        class Context_with_invalid_id_and_update_request {
+
+            @BeforeEach
+            void setUp() {
+                givenInvalidId = NOT_EXIST_ID;
+
+                updateRequest = TaskUpdateData.builder()
+                        .title(UPDATE_TITLE)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("응답코드 404를 반환한다")
+            void it_returns_404() throws Exception {
+                mockMvc.perform(patch("/diaries/1/tasks/100")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest))
+                )
+                        .andExpect(status().isNotFound());
+
+                verify(taskService).updateTask(eq(NOT_EXIST_ID), any(TaskUpdateData.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하는 할 일 id와 수정할 타이틀이 주어지지 않는다면")
+        class Context_with_valid_id_and_invalid_attributes {
+
+            @BeforeEach
+            void setUp() {
+                givenValidId = ID;
+
+                invalidAttributes = TaskUpdateData.builder()
+                        .title("")
+                        .build();
+            }
+
+            @Test
+            @DisplayName("응답코드 400를 반환한다")
+            void it_returns_400() throws Exception {
+                mockMvc.perform(patch("/diaries/1/tasks/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidAttributes))
+                )
+                        .andExpect(status().isBadRequest());
+            }
+        }
+    }
+
 
     @AfterEach
     public void afterEach() {
