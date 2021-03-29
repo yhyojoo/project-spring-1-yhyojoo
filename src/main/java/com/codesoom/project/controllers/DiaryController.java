@@ -2,7 +2,9 @@ package com.codesoom.project.controllers;
 
 import com.codesoom.project.application.DiaryService;
 import com.codesoom.project.domain.Diary;
-import com.codesoom.project.dto.DiaryData;
+import com.codesoom.project.dto.DiaryCreateData;
+import com.codesoom.project.dto.DiaryResultData;
+import com.codesoom.project.dto.DiaryUpdateData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -53,27 +55,27 @@ public class DiaryController {
     /**
      * 새로운 다이어리를 생성합니다.
      *
-     * @param diaryData 생성할 다이어리 정보
+     * @param diaryCreateData 생성할 다이어리 정보
      * @return 생성된 다이어리
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Diary create(@RequestBody @Valid DiaryData diaryData) {
-        return diaryService.createDiary(diaryData);
+    public DiaryResultData create(@RequestBody @Valid DiaryCreateData diaryCreateData) {
+        return diaryService.createDiary(diaryCreateData);
     }
 
     /**
      * 주어진 id에 해당하는 다이어리 정보를 수정합니다.
      *
      * @param id 다이어리 식별자
-     * @param diaryData 수정할 다이어리 정보
+     * @param diaryUpdateData 수정할 다이어리 정보
      * @return 수정된 다이어리
      */
     @PatchMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Diary update(@PathVariable Long id,
-                        @RequestBody @Valid DiaryData diaryData) {
-        return diaryService.updateDiary(id, diaryData);
+    public DiaryResultData update(@PathVariable Long id,
+                        @RequestBody @Valid DiaryUpdateData diaryUpdateData) {
+        return diaryService.updateDiary(id, diaryUpdateData);
     }
 
     /**

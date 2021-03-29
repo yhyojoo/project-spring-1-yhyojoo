@@ -3,7 +3,9 @@ package com.codesoom.project.controllers;
 import com.codesoom.project.application.DiaryService;
 import com.codesoom.project.domain.Diary;
 import com.codesoom.project.domain.DiaryRepository;
-import com.codesoom.project.dto.DiaryData;
+import com.codesoom.project.dto.DiaryCreateData;
+import com.codesoom.project.dto.DiaryResultData;
+import com.codesoom.project.dto.DiaryUpdateData;
 import com.codesoom.project.errors.DiaryNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -55,10 +57,11 @@ class DiaryControllerTest {
     private static final String UPDATE_COMMENT = "보람찬 하루였다";
 
     private Diary diary;
-    private Diary updatedDiary;
+    private DiaryResultData createdDiary;
+    private DiaryResultData updatedDiary;
     private Long givenValidId;
     private Long givenInvalidId;
-    private DiaryData InvalidAttributes;
+    private DiaryCreateData InvalidAttributes;
 
     @BeforeEach
     void setUp() {
@@ -70,7 +73,13 @@ class DiaryControllerTest {
                 .comment(COMMENT)
                 .build();
 
-        updatedDiary = Diary.builder()
+        createdDiary = DiaryResultData.builder()
+                .id(ID)
+                .title(TITLE)
+                .comment(COMMENT)
+                .build();
+
+        updatedDiary = DiaryResultData.builder()
                 .id(ID)
                 .title(UPDATE_TITLE)
                 .comment(UPDATE_COMMENT)
@@ -85,12 +94,12 @@ class DiaryControllerTest {
         given(diaryService.getDiary(eq(NOT_EXIST_ID)))
                 .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
 
-        given(diaryService.createDiary(any(DiaryData.class))).willReturn(diary);
+        given(diaryService.createDiary(any(DiaryCreateData.class))).willReturn(createdDiary);
 
-        given(diaryService.updateDiary(eq(ID), any(DiaryData.class)))
+        given(diaryService.updateDiary(eq(ID), any(DiaryUpdateData.class)))
                 .willReturn(updatedDiary);
 
-        given(diaryService.updateDiary(eq(NOT_EXIST_ID), any(DiaryData.class)))
+        given(diaryService.updateDiary(eq(NOT_EXIST_ID), any(DiaryUpdateData.class)))
                 .willThrow(new DiaryNotFoundException(NOT_EXIST_ID));
 
         given(diaryService.deleteDiary(eq(NOT_EXIST_ID)))
@@ -170,7 +179,7 @@ class DiaryControllerTest {
     @Nested
     @DisplayName("create 메소드는")
     class Describe_create {
-        DiaryData createRequest;
+        DiaryCreateData createRequest;
 
         @Nested
         @DisplayName("생성할 다이어리 정보가 주어진다면")
@@ -178,7 +187,7 @@ class DiaryControllerTest {
 
             @BeforeEach
             void setUp() {
-                createRequest = DiaryData.builder()
+                createRequest = DiaryCreateData.builder()
                         .title(TITLE)
                         .comment(COMMENT)
                         .build();
@@ -196,7 +205,7 @@ class DiaryControllerTest {
                         .andExpect(jsonPath("title").value(TITLE))
                         .andExpect(jsonPath("comment").value(COMMENT));
 
-                verify(diaryService).createDiary(any(DiaryData.class));
+                verify(diaryService).createDiary(any(DiaryCreateData.class));
             }
         }
 
@@ -206,7 +215,7 @@ class DiaryControllerTest {
 
             @BeforeEach
             void setUp() {
-                InvalidAttributes = DiaryData.builder()
+                InvalidAttributes = DiaryCreateData.builder()
                         .title("")
                         .comment(COMMENT)
                         .build();
@@ -227,7 +236,7 @@ class DiaryControllerTest {
     @Nested
     @DisplayName("update 메소드는")
     class Describe_update {
-        DiaryData updateRequest;
+        DiaryCreateData updateRequest;
 
         @Nested
         @DisplayName("등록된 다이어리 id와 수정할 정보가 주어진다면")
@@ -237,7 +246,7 @@ class DiaryControllerTest {
             void setUp() {
                 givenValidId = ID;
 
-                updateRequest = DiaryData.builder()
+                updateRequest = DiaryCreateData.builder()
                         .title(UPDATE_TITLE)
                         .comment(UPDATE_COMMENT)
                         .build();
@@ -255,7 +264,7 @@ class DiaryControllerTest {
                         .andExpect(jsonPath("title").value(UPDATE_TITLE))
                         .andExpect(jsonPath("comment").value(UPDATE_COMMENT));
 
-                verify(diaryService).updateDiary(eq(ID), any(DiaryData.class));
+                verify(diaryService).updateDiary(eq(ID), any(DiaryUpdateData.class));
             }
         }
 
@@ -267,7 +276,7 @@ class DiaryControllerTest {
             void setUp() {
                 givenInvalidId = NOT_EXIST_ID;
 
-                updateRequest = DiaryData.builder()
+                updateRequest = DiaryCreateData.builder()
                         .title(UPDATE_TITLE)
                         .comment(UPDATE_COMMENT)
                         .build();
@@ -282,7 +291,7 @@ class DiaryControllerTest {
                 )
                         .andExpect(status().isNotFound());
 
-                verify(diaryService).updateDiary(eq(NOT_EXIST_ID), any(DiaryData.class));
+                verify(diaryService).updateDiary(eq(NOT_EXIST_ID), any(DiaryUpdateData.class));
             }
         }
 
@@ -294,7 +303,7 @@ class DiaryControllerTest {
             void setUp() {
                 givenValidId = ID;
 
-                InvalidAttributes = DiaryData.builder()
+                InvalidAttributes = DiaryCreateData.builder()
                         .title("")
                         .comment(UPDATE_COMMENT)
                         .build();
@@ -358,6 +367,5 @@ class DiaryControllerTest {
     @AfterEach
     public void afterEach() {
         diaryRepository.delete(diary);
-        diaryRepository.delete(updatedDiary);
     }
 }
