@@ -18,7 +18,7 @@ class {
         await axios.post('http://localhost:8080/diaries', {
             title,
         });
-        await this.loadDiaries();
+        this.loadDiaries();
     }
 
    editDiary(id) {
@@ -40,12 +40,12 @@ class {
         await axios.patch(`http://localhost:8080/diaries/${id}`, {
             title,
         });
-        await this.loadDiaries();
+        this.loadDiaries();
     }
 
     async deleteDiary(id) {
         await axios.delete(`http://localhost:8080/diaries/${id}`);
-        await this.loadDiaries();
+        this.loadDiaries();
     }
 }
 
